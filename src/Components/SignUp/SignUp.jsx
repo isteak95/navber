@@ -11,11 +11,16 @@ const SignUp = () => {
   const [passwordValidationError, setPasswordValidationError] = useState("");
   const emailRef = useRef(null);
   const passwordRef = useRef(null);
+  const photoURLRef = useRef(null);
+  const nameRef = useRef(null); // Add a reference for the name input field
 
   const handleSignUp = (e) => {
     e.preventDefault();
     const email = emailRef.current.value;
     const password = passwordRef.current.value;
+    const photoURL = photoURLRef.current.value;
+    const name = nameRef.current.value; // Retrieve the name from the input field
+
     setSignUpError("");
     setPasswordValidationError("");
 
@@ -28,14 +33,25 @@ const SignUp = () => {
     } else {
       createUser(email, password)
         .then((result) => {
-          console.log(result.user);
-          toast.success("Sign up successful!");
-          // Clear input fields
-          emailRef.current.value = "";
-          passwordRef.current.value = "";
+          // Set user's name and photo URL
+          result.user.updateProfile({
+            displayName: name, // Set the user's display name
+            photoURL: photoURL, // Set the user's photo URL
+          }).then(() => {
+            console.log("User profile updated successfully");
+            toast.success("Sign up successful!");
+            // Clear input fields
+            emailRef.current.value = "";
+            passwordRef.current.value = "";
+            photoURLRef.current.value = "";
+            nameRef.current.value = ""; // Clear the name input field
+          }).catch((error) => {
+            console.error("Error updating user profile:", error);
+            toast.error("Error updating user profile");
+          });
         })
         .catch((error) => {
-          console.log(error);
+          console.error(error);
           setSignUpError(error.message);
           toast.error("Sign up failed");
         });
@@ -59,6 +75,7 @@ const SignUp = () => {
                   placeholder="Your name"
                   className="input input-bordered"
                   required
+                  ref={nameRef} // Add ref to the name input field
                 />
               </div>
               <div className="form-control my-10">
@@ -72,6 +89,20 @@ const SignUp = () => {
                   className="input input-bordered"
                   required
                   ref={emailRef}
+                />
+              </div>
+
+              <div className="form-control my-10">
+                <label className="label">
+                  <span className="label-text">PhotoURL</span>
+                </label>
+                <input
+                  name="PhotoUrl"
+                  type="text"
+                  placeholder="PhotoUrl"
+                  className="input input-bordered"
+                  required
+                  ref={photoURLRef}
                 />
               </div>
               <div className="form-control">
